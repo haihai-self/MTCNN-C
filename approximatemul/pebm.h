@@ -16,7 +16,7 @@ int pebm(int x, int y) {
     using std::fill;
     int Ypp[8][17] = {0};
     int jfm_dec[8][4] = {0};
-    partialProduct(x, y, Ypp, jfm_dec);
+    partialProduct(x, y, Ypp, jfm_dec, decoder3);
 
     int s2 = ((~(Ypp[0][0]) & 1) | ((jfm_dec[7][0] & Ypp[7][16]) & 1)) & 1;
     int s1 = ((~(jfm_dec[7][0] & Ypp[7][16]) & 1) & Ypp[0][0]) & 1;

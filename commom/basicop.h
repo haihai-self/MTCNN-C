@@ -29,13 +29,31 @@ void decToBin(int num, int *result, int length) {
  * @param X　需要编码的数
  * @param E 编码的结果
  */
-void decoder(const int *X, int *E) {
+void decoder3(const int *X, int *E) {
     int a1 = (X[0] & 1) ^(X[1] & 1);
     int a2 = (X[0] & 1) ^(X[2] & 1);
     E[3] = (~((a1 & 1) | (a2 & 1)) & 1);
     E[2] = (X[2] & 1) ^ (X[1] & 1);
     E[1] = (a1 & 1) & (a2 & 1);
     E[0] = X[0] & 1;
+}
+
+void decoder8(const int* X, int *E){
+    int a1 = (X[3] ^ X[2]) & 1;
+    int a2 = (X[1] ^ X[0]) & 1;
+    int a3 = ~(X[3] | X[2]) & 1;
+    int a4 = (X[3] & X[2]) & 1;
+
+    E[3] = (a1 & ~a2) & 1;
+
+    if(X[1] == 1)
+        E[2] = a3;
+    else
+        E[2] = a4;
+
+    E[1] = (a1 & a2) & 1;
+    E[0] = ((~X[0] & X[1] & a4) | (X[0] & ~X[1] & a3)) & 1;
+    E[4] = X[0] & 1;
 }
 
 /**
@@ -46,9 +64,14 @@ void decoder(const int *X, int *E) {
  * @param sum 该位的结果
  * @param cout 给上一位的进位
  */
-void bit1FA(const int X, const int Y, const int C0, int &sum, int &cout) {
+void bit1FA(const int X, const int Y, const int C0, int &sum, int &carry) {
     sum = (((X & 1) ^ (Y & 1)) ^ (C0 & 1)) & 1;
-    cout = ((((X & 1) & (Y & 1)) | ((X & 1) & (C0 & 1))) | ((Y & 1) & (C0 & 1))) & 1;
+    carry = ((((X & 1) & (Y & 1)) | ((X & 1) & (C0 & 1))) | ((Y & 1) & (C0 & 1))) & 1;
+}
+
+void bit2FA(const int *X, const int Cin , int & sum, int & carry){
+    sum = (Cin ^ (X[1] ^ X[2])) & 1;
+    carry = X[0];
 }
 
 /**
@@ -69,13 +92,44 @@ void nbitAdder(const int *X, const int *Y, const int cin, int n, int *sum, int &
     carry = c[0];
 }
 
+void nbitAppAdder(const int * X, int * sum){
+    int sel[16] = {0};
+    for(int i = 15; i >=9; i-=2){
+        if(i != 15)
+            bit2FA(&X[i-2], X[i+ 1],sum[i], sum[i-1]);
+        else
+            bit2FA(&X[i-2], 0, sum[i], sum[i-1]);
+        if(X[i-1] == 0){
+            if(i!=15)
+                sel[i] = X[i] & X[i + 1] & 1;
+            else
+                sel[i] = 0;
+        }else{
+            if(i !=  15)
+                sel[i] = ~((X[i] | X[i+1]) & 1) & 1;
+            else
+                sel[i] = ~(X[i] & 1) & 1;
+        }
+    }
+    int count = 0;
+    for(int i = 0 ;i< 10; ++i)
+        count+= sel[i];
+    int cin = 0;
+    if(count == 0)
+        cin = X[8];
+    else
+        cin = X[7];
+    nbitAdder(&X[1], X, cin, 7, &sum[1], sum[0]);
+    sum[8] = (sum[9] ^ count) & 1;
+
+}
 /**
- * generate the sign of partial products,don't need jfm_dec
+ * generate the sign of decoder,don't need jfm_dec
  * @param x 被乘数
  * @param y　乘数
  * @param Ypp　产生的partial product保存的结果
  */
-void partialProduct(const int x, const int y, int  (*Ypp)[17]) {
+void partialProduct(const int x, const int y, int  (*Ypp)[17], void (*decoder)(const int *X, int *E)) {
     int complementx[LENGTH] = {0};
     int complementy[LENGTH] = {0};
     decToBin(x, complementx, LENGTH);
@@ -94,7 +148,7 @@ void partialProduct(const int x, const int y, int  (*Ypp)[17]) {
 
     int jfm_dec[8][4] = {0};
     for (int i = 7; i >= 0; --i) {
-        decoder(&xtemp[2 * i], jfm_dec[7 - i]);
+        decoder3(&xtemp[2 * i], jfm_dec[7 - i]);
         for (int j = 17; j >= 1; --j) {
             Ypp[7 - i][j - 1] = int(
                     (((jfm_dec[7 - i][2] & 1) & (YP[j - 1]) & 1) | ((jfm_dec[7 - i][1] & 1) & (YP[j] & 1))) ^
@@ -105,13 +159,13 @@ void partialProduct(const int x, const int y, int  (*Ypp)[17]) {
 
 
 /**
- * generate the sign of partial products, need jfm_dec
+ * generate the sign of decoder, need jfm_dec
  * @param x 被乘数
  * @param y 乘数
  * @param Ypp partial product
  * @param jfm_dec decode
  */
-void partialProduct(const int x, const int y, int (*Ypp)[17], int (*jfm_dec)[4]) {
+void partialProduct(const int x, const int y, int (*Ypp)[17], int (*jfm_dec)[4], void (*decoder)(const int *X, int *E)) {
     int complementx[LENGTH] = {0};
     int complementy[LENGTH] = {0};
     decToBin(x, complementx, LENGTH);
@@ -137,6 +191,40 @@ void partialProduct(const int x, const int y, int (*Ypp)[17], int (*jfm_dec)[4])
         }
     }
 }
+
+void partialProcudtAbm2(int x, int y, int (*Ypp)[18], int (*dec)[5]){
+    int complementx[LENGTH] = {0};
+    int complementy[LENGTH] = {0};
+    decToBin(x, complementx, LENGTH);
+    decToBin(y, complementy, LENGTH);
+
+    int Ytemp[20] = {0};
+    int Xtemp[19] = {0};
+    int YP3[18] = {0};
+
+    Ytemp[0] = complementy[0];
+    Ytemp[1] = complementy[0];
+    for(int i =0; i < 16; ++i)
+        Ytemp[2+i] = complementy[i];
+
+    Xtemp[0] = complementx[0];
+    Xtemp[1] = complementx[0];
+    for(int i =0; i < 16; ++i)
+        Xtemp[2+i] = complementx[i];
+
+    int Y3[16] = {0};
+    nbitAppAdder(complementy, Y3);
+    YP3[0] = complementy[0];
+    YP3[17] = complementy[15];
+    for(int i =0; i< 16; ++i)
+        YP3[1 + i] = Y3[i];
+    for(int i = 5; i >= 0; --i){
+        decoder8(&Xtemp[i*3], dec[5-i]);
+        for(int j = 19; j >= 2; --j)
+            Ypp[5 - i][j - 2] = (((dec[5 - i][3] & Ytemp[j - 2]) | (dec[5 - i][2] & Ytemp[j -1]) | (dec[5 - i][1] & YP3[j - 2]) | (dec[5 - i][0] & Ytemp[j])) ^ dec[5 - i][4]) & 1;
+    }
+}
+
 
 /**
  * bm07 pebm可以通用

@@ -20,7 +20,7 @@
 int bm07(int x, int y){
     using std::fill;
     int Ypp[8][17] = {0};
-    partialProduct(x, y, Ypp);
+    partialProduct(x, y, Ypp, decoder3);
 
     int ec = Ypp[0][2] + Ypp[1][4] + Ypp[2][6] + Ypp[3][8] + Ypp[4][10] + Ypp[5][12] + Ypp[6][14] + Ypp[7][16];
     int c0 = 0;
