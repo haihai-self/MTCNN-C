@@ -7,6 +7,7 @@
 #ifndef MTCNN_BASICOP_H
 #define MTCNN_BASICOP_H
 
+#include <cstring>
 
 # define LENGTH 16
 
@@ -60,9 +61,9 @@ void bit1FA(const int X, const int Y, const int C0, int &sum, int &cout) {
  */
 void nbitAdder(const int *X, const int *Y, const int cin, int n, int *sum, int &carry) {
 
-    int * c = new int[n + 1];
+    int *c = new int[n + 1];
     c[n] = cin;
-    for (int i = n -1; i >= 0; --i) {
+    for (int i = n - 1; i >= 0; --i) {
         bit1FA(X[i], Y[i], c[i + 1], sum[i], c[i]);
     }
     carry = c[0];
@@ -136,5 +137,75 @@ void partialProduct(const int x, const int y, int (*Ypp)[17], int (*jfm_dec)[4])
         }
     }
 }
-#endif //MTCNN_BASICOP_H#ifndef SIGNEDM_BASICOP_H
-#define SIGNEDM_BASICOP_H
+
+/**
+ * bm07 pebm可以通用
+ * @param Ypp 生成的partial product
+ * @param X_ 保存中间结果
+ * @param Y_ 保存中间结果
+ * @param sum_pr 保存中间结果
+ * @param carry 保存中间结果的carry
+ * @param length 产生的partial product 的最大长度
+ */
+void sumPartialProduct(int (*Ypp)[17], int *X_, int *Y_, int (*sum_pr)[32], int *carry, int length) {
+    using std::fill;
+
+
+    Y_[12] = 1;
+    Y_[13] = ~(Ypp[1][0] & 1) & 1;
+    for (int i = 1; i < 3; ++i)
+        Y_[13 + i] = Ypp[1][i];
+    nbitAdder(X_, Y_, 0, length, sum_pr[0], carry[0]);
+
+    fill(X_, X_ + length, 0);
+    fill(Y_, Y_ + length, 0);
+    Y_[10] = 1;
+    Y_[11] = ~(Ypp[2][0] & 1) & 1;
+    for (int i = 1; i < 5; ++i) {
+        Y_[11 + i] = Ypp[2][i];
+    }
+    nbitAdder(sum_pr[0], Y_, 0, length, sum_pr[1], carry[1]);
+
+    fill(Y_, Y_ + length, 0);
+    Y_[8] = 1;
+    Y_[9] = ~(Ypp[3][0] & 1) & 1;
+    for (int i = 1; i < 7; ++i) {
+        Y_[9 + i] = Ypp[3][i];
+    }
+    nbitAdder(sum_pr[1], Y_, 0, length, sum_pr[0], carry[0]);
+
+    fill(Y_, Y_ + length, 0);
+    Y_[6] = 1;
+    Y_[7] = ~(Ypp[4][0] & 1) & 1;
+    for (int i = 1; i < 9; ++i) {
+        Y_[7 + i] = Ypp[4][i];
+    }
+    nbitAdder(sum_pr[0], Y_, 0, length, sum_pr[1], carry[1]);
+
+    fill(Y_, Y_ + length, 0);
+    Y_[4] = 1;
+    Y_[5] = ~(Ypp[5][0] & 1) & 1;
+    for (int i = 1; i < 11; ++i) {
+        Y_[5 + i] = Ypp[5][i];
+    }
+    nbitAdder(sum_pr[1], Y_, 0, length, sum_pr[0], carry[0]);
+
+    fill(Y_, Y_ + length, 0);
+    Y_[2] = 1;
+    Y_[3] = ~(Ypp[6][0] & 1) & 1;
+    for (int i = 1; i < 13; ++i) {
+        Y_[3 + i] = Ypp[6][i];
+    }
+    nbitAdder(sum_pr[0], Y_, 0, length, sum_pr[1], carry[1]);
+
+    fill(Y_, Y_ + length, 0);
+    Y_[0] = 1;
+    Y_[1] = ~(Ypp[7][0] & 1) & 1;
+    for (int i = 1; i < 15; ++i) {
+        Y_[1 + i] = Ypp[7][i];
+    }
+    nbitAdder(sum_pr[1], Y_, 0, length, sum_pr[0], carry[0]);
+
+}
+
+#endif //MTCNN_BASICOP_H
