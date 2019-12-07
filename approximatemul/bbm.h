@@ -35,8 +35,6 @@ int bbm(int x, int y){
     Y_[12] = ~(Ypp[1][0] & 1) & 1;
     for(int i =1; i < 4; ++ i)
         Y_[12 + i] = Ypp[1][i];
-
-
     nbitAdder(X_, Y_, 0, 31, sum[0], cout_result[0]);
 
     fill(X_, X_ + 31, 0);
@@ -55,11 +53,6 @@ int bbm(int x, int y){
     nbitAdder(sum[1], Y_, 0, 31, sum[0], cout_result[0]);
 
     fill(Y_, Y_ + 31, 0);
-    Y_[11] = Ypp[2][1];
-    Y_[12] = Ypp[2][2];
-    Y_[13] = Ypp[2][3];
-    Y_[14] = Ypp[2][4];
-    Y_[15] = Ypp[2][5];
     Y_[5] = 1;
     Y_[6] = ~(Ypp[4][0] & 1) & 1;
     for(int i = 1; i < 10; ++i)
