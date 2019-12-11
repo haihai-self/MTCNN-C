@@ -77,7 +77,7 @@ int bbm(int x, int y){
 
 
     fillZero(Y_, 31, 0);
-    Y_[0] = ~(Ypp[6][0] & 1) & 1;
+    Y_[0] = ~(Ypp[7][0] & 1) & 1;
     for(int i = 1; i< 16; ++ i)
         Y_[i] = Ypp[7][i];
 
