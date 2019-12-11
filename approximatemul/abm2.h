@@ -10,7 +10,7 @@
 #include <iostream>
 #include "../commom/basicop.h"
 
-int amb2(int x, int y) {
+int abm2(int x, int y) {
     using std::fill;
     int Ypp[6][18] = {0};
     int dec[6][5] = {0};
@@ -31,7 +31,7 @@ int amb2(int x, int y) {
     Y_[10] = ~Ypp[1][0] & 1;
     for (int i = 1; i < 6; ++i)
         Y_[10 + i] = Ypp[1][i];
-    nbitAdder(X_, Y_, 0, 31, sum_pr[0], carry[0]);
+    nbitAdder(X_, Y_, 0, 31, sum_pr[0], &carry[0]);
 
     fill(X_, X_ + 31, 0);
     fill(Y_, Y_ + 31, 0);
@@ -40,7 +40,7 @@ int amb2(int x, int y) {
     Y_[7] = ~Ypp[2][0] & 1;
     for (int i = 1; i < 9; ++i)
         Y_[7 + i] = Ypp[2][i];
-    nbitAdder(sum_pr[0], Y_, 0, 31, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 31, sum_pr[1], &carry[1]);
 
     fill(Y_, Y_ + 31, 0);
     Y_[2] = 1;
@@ -48,7 +48,7 @@ int amb2(int x, int y) {
     Y_[4] = ~Ypp[3][0] & 1;
     for (int i = 1; i < 12; ++i)
         Y_[4 + i] = Ypp[3][i];
-    nbitAdder(sum_pr[1], Y_, 0, 31, sum_pr[0], carry[0]);
+    nbitAdder(sum_pr[1], Y_, 0, 31, sum_pr[0], &carry[0]);
 
 
     fill(Y_, Y_ + 31, 0);
@@ -56,20 +56,20 @@ int amb2(int x, int y) {
     Y_[1] = ~Ypp[4][0] & 1;
     for (int i = 1; i < 15; ++i)
         Y_[1 + i] = Ypp[4][i];
-    nbitAdder(sum_pr[0], Y_, 0, 31, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 31, sum_pr[1], &carry[1]);
 
     fill(Y_, Y_ + 31, 0);
     for (int i = 0; i < 16; ++i)
         Y_[i] = Ypp[5][i + 2];
-    nbitAdder(sum_pr[1], Y_, 0, 31, sum_pr[0], carry[0]);
+    nbitAdder(sum_pr[1], Y_, 0, 31, sum_pr[0], &carry[0]);
 
     fill(Y_, Y_ + 31, 0);
     Y_[15] = dec[5][4];
-    nbitAdder(sum_pr[0], Y_, 0, 31, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 31, sum_pr[1], &carry[1]);
 
     fill(Y_, Y_ + 31, 0);
     Y_[14] = 1;
-    nbitAdder(sum_pr[1], Y_, 0, 31, sum_pr[0], carry[0]);
+    nbitAdder(sum_pr[1], Y_, 0, 31, sum_pr[0], &carry[0]);
 
     int mul[31] = {0};
     memcpy(mul, sum_pr[0], 31 * sizeof(int));

@@ -13,10 +13,9 @@
 #include <cstring>
 
 int pebm(int x, int y) {
-    using std::fill;
     int Ypp[8][17] = {0};
     int jfm_dec[8][4] = {0};
-    partialProduct(x, y, Ypp, jfm_dec, decoder3);
+    partialProductJfm(x, y, Ypp, jfm_dec);
 
     int s2 = ((~(Ypp[0][0]) & 1) | ((jfm_dec[7][0] & Ypp[7][16]) & 1)) & 1;
     int s1 = ((~(jfm_dec[7][0] & Ypp[7][16]) & 1) & Ypp[0][0]) & 1;
@@ -45,17 +44,17 @@ int pebm(int x, int y) {
     X_[15] = s0;
     sumPartialProduct(Ypp, X_, Y_, sum_pr, carry, 32);
 
-    fill(Y_, Y_ + 32, 0);
+    fillZero(Y_, 32, 0);
     Y_[13] = complement_c1[0];
-    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], &carry[1]);
 
-    fill(Y_, Y_ + 32, 0);
+    fillZero(Y_, 32, 0);
     Y_[14] = complement_c1[1];
-    nbitAdder(sum_pr[1], Y_, 0, 32, sum_pr[0], carry[0]);
+    nbitAdder(sum_pr[1], Y_, 0, 32, sum_pr[0], &carry[0]);
 
-    fill(Y_, Y_ + 32, 0);
+    fillZero(Y_, 32, 0);
     Y_[15] = complement_c1[2];
-    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], &carry[1]);
 
     int mul[32] = {0};
     memcpy(mul, sum_pr[1], 32 * sizeof(int));

@@ -20,7 +20,7 @@
 int bm07(int x, int y){
     using std::fill;
     int Ypp[8][17] = {0};
-    partialProduct(x, y, Ypp, decoder3);
+    partialProduct(x, y, Ypp);
 
     int ec = Ypp[0][2] + Ypp[1][4] + Ypp[2][6] + Ypp[3][8] + Ypp[4][10] + Ypp[5][12] + Ypp[6][14] + Ypp[7][16];
     int c0 = 0;
@@ -44,23 +44,23 @@ int bm07(int x, int y){
 
     fill(Y_, Y_ + 32, 0);
     Y_[13] = complement_cc[1];
-    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], &carry[1]);
 
     fill(Y_, Y_ + 32, 0);
     Y_[14] = complement_cc[2];
-    nbitAdder(sum_pr[1], Y_, 0, 32, sum_pr[0], carry[0]);
+    nbitAdder(sum_pr[1], Y_, 0, 32, sum_pr[0], &carry[0]);
 
     fill(Y_, Y_ + 32, 0);
     Y_[15] = complement_cc[3];
-    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], &carry[1]);
 
     fill(Y_, Y_ + 32, 0);
     Y_[15] = 1;
-    nbitAdder(sum_pr[1], Y_, 0, 32, sum_pr[0], carry[0]);
+    nbitAdder(sum_pr[1], Y_, 0, 32, sum_pr[0], &carry[0]);
 
     fill(Y_, Y_ + 32, 0);
     Y_[15] = complement_cc[0];
-    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], carry[1]);
+    nbitAdder(sum_pr[0], Y_, 0, 32, sum_pr[1], &carry[1]);
 
     int mul[32] = {0};
     memcpy(mul, sum_pr[1], 32 * sizeof(int));
